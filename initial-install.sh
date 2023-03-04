@@ -104,4 +104,25 @@ echo "eula=true" >> ./Minecraft/eula.txt
 wget https://github.com/TheTrillerpfeife/Minecraft-Server-Wrapper/releases/download/v0.0.1/Minecraft-Server-Wrapper-0.0.1.jar
 mv Minecraft-Server-Wrapper-0.0.1.jar Minecraft-Server-Wrapper.jar
 
-java -jar Minecraft-Server-Wrapper.jar
+sudo sh -c 'cat <<EOT >> /etc/systemd/system/minecraft.service
+[Unit]
+Description=A Service to start the Minecraft Wrapper
+After=network.target
+
+[Service]
+User=ec2-user
+
+Type=simple
+
+WorkingDirectory=/home/ec2-user
+ExecStart=/usr/bin/java -jar Minecraft-Server-Wrapper.jar
+ExecStop=/bin/kill -15 $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+
+EOT'
+
+sudo systemctl daemon-reload
+sudo systemctl enable minecraft.service
+sudo systemctl start minecraft.service
